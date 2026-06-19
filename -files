@@ -1,0 +1,43 @@
+[33mcommit 705db890a21224e3bd20a44ebf1880e10659ef70[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m)[m
+Author: Josef1502 <jmario.mbaga@gmail.com>
+Date:   Thu Jun 18 13:40:39 2026 +0200
+
+    Version initiale propre
+
+ .streamlit/secrets.toml                            |      2 [32m+[m
+ app.py                                             |   1407 [32m+[m
+ comparaison_modeles.png                            |    Bin [31m0[m -> [32m72576[m bytes
+ ...vaux_Axe_Sud_Est_S02_du_05_01_au_11_01_261.xlsx |    Bin [31m0[m -> [32m26711[m bytes
+ ...avaux_Axe_Sud_Est_S03_du_12_01_au_18_01_26.xlsx |    Bin [31m0[m -> [32m33337[m bytes
+ ...avaux_Axe_Sud_Est_S04_du_19_01_au_25_01_26.xlsx |    Bin [31m0[m -> [32m40203[m bytes
+ ...avaux_Axe_Sud_Est_S05_du_26_01_au_01_02_26.xlsx |    Bin [31m0[m -> [32m41810[m bytes
+ ...avaux_Axe_Sud_Est_S06_du_02_02_au_08_02_26.xlsx |    Bin [31m0[m -> [32m52577[m bytes
+ ...avaux_Axe_Sud_Est_S07_du_09_02_au_15_02_26.xlsx |    Bin [31m0[m -> [32m49020[m bytes
+ ...ravaux_Axe_Sud_Est_S08_du16_02_au_22_02_26.xlsx |    Bin [31m0[m -> [32m54132[m bytes
+ ...avaux_Axe_Sud_Est_S08_du_16_02_au_22_02_26.xlsx |    Bin [31m0[m -> [32m49918[m bytes
+ ...avaux_Axe_Sud_Est_S09_du_23_02_au_01_03_26.xlsx |    Bin [31m0[m -> [32m44879[m bytes
+ ...avaux_Axe_Sud_Est_S10_du_02_03_au_08_03_26.xlsx |    Bin [31m0[m -> [32m45012[m bytes
+ ...avaux_Axe_Sud_Est_S11_du_09_03_au_15_03_26.xlsx |    Bin [31m0[m -> [32m45184[m bytes
+ ...avaux_Axe_Sud_Est_S12_du_16_03_au_22_03_26.xlsx |    Bin [31m0[m -> [32m45708[m bytes
+ ...avaux_Axe_Sud_Est_S13_du_23_03_au_29_03_26.xlsx |    Bin [31m0[m -> [32m44950[m bytes
+ ...avaux_Axe_Sud_Est_S14_du_30_03_au_05_04_26.xlsx |    Bin [31m0[m -> [32m41319[m bytes
+ ...avaux_Axe_Sud_Est_S15_du_06_04_au_12_04_26.xlsx |    Bin [31m0[m -> [32m43950[m bytes
+ ...avaux_Axe_Sud_Est_S16_du_13_04_au_19_04_26.xlsx |    Bin [31m0[m -> [32m48392[m bytes
+ ...avaux_Axe_Sud_Est_S17_du_20_04_au_26_04_26.xlsx |    Bin [31m0[m -> [32m47246[m bytes
+ ...avaux_Axe_Sud_Est_S18_du_27_04_au_03_05_26.xlsx |    Bin [31m0[m -> [32m42741[m bytes
+ ...avaux_Axe_Sud_Est_S19_du_04_05_au_10_05_26.xlsx |    Bin [31m0[m -> [32m2711546[m bytes
+ ...avaux_Axe_Sud_Est_S20_du_11_05_au_17_05_26.xlsx |    Bin [31m0[m -> [32m33990[m bytes
+ ...avaux_Axe_Sud_Est_S21_du_18_05_au_24_05_26.xlsx |    Bin [31m0[m -> [32m36198[m bytes
+ ...avaux_Axe_Sud_Est_S22_du_25_05_au_31_05_26.xlsx |    Bin [31m0[m -> [32m34932[m bytes
+ ...avaux_Axe_Sud_Est_S23_du_01_06_au_07_06_26.xlsx |    Bin [31m0[m -> [32m35055[m bytes
+ encoder_infrapole.pkl                              |    Bin [31m0[m -> [32m630[m bytes
+ encoder_jour.pkl                                   |    Bin [31m0[m -> [32m549[m bytes
+ importance_features.png                            |    Bin [31m0[m -> [32m49852[m bytes
+ lignes_axe_sudest.csv                              | 102014 [32m++++++++++++++++++[m
+ matrices_confusion.png                             |    Bin [31m0[m -> [32m182568[m bytes
+ ml_model.py                                        |    504 [32m+[m
+ model.pkl                                          |    Bin [31m0[m -> [32m4799277[m bytes
+ pipeline_etl.py                                    |    403 [32m+[m
+ requirements.txt                                   |      0
+ travaux_sncf.db                                    |    Bin [31m0[m -> [32m2465792[m bytes
+ 36 files changed, 104330 insertions(+)
