@@ -5,9 +5,9 @@ Application Streamlit — Supervision des Travaux Ferroviaires
 SNCF Voyageurs — Axe Sud-Est
 
 Pages :
-  1. 🗺️  Carte interactive des travaux
-  2. 📊  Tableau de bord & statistiques
-  3. 🤖  Prédiction ML de la priorité
+  1. Carte interactive des travaux
+  2. Tableau de bord & statistiques
+  3. Prédiction ML de la priorité
 
 Usage :
     streamlit run app.py
@@ -367,7 +367,7 @@ def sidebar(df):
 
     with col_deco:
         st.markdown("<div style='padding-top:18px;'></div>", unsafe_allow_html=True)
-        if st.button("🔓 Déconnexion", use_container_width=True):
+        if st.button("Déconnexion", use_container_width=True):
             st.session_state.authentifie = False
             st.rerun()
 
@@ -412,19 +412,6 @@ def sidebar(df):
     st.sidebar.markdown(
         f"<span style='font-family:Roboto Mono, monospace; font-size:13px;'>"
         f"📦 {len(df):,} chantiers · {df['semaine'].nunique()} semaines</span>",
-        unsafe_allow_html=True,
-    )
-
-    # ── Bandeau problématique ──────────────────
-    st.markdown(
-        "<div style='background:#1A1A2E; border-left:5px solid #FFC000; "
-        "border-radius:8px; padding:12px 18px; margin-bottom:1rem;'>"
-        "<span style='font-family:Roboto Mono, monospace; font-size:11px; "
-        "color:#FFC000; letter-spacing:0.06em;'>PROBLÉMATIQUE</span><br>"
-        "<span style='color:#F0F0F0; font-style:italic;'>Comment améliorer la supervision "
-        "des travaux ferroviaires grâce à l'exploitation des données historiques "
-        "et à l'intelligence artificielle ?</span>"
-        "</div>",
         unsafe_allow_html=True,
     )
 
@@ -512,7 +499,7 @@ def page_carte(df_filtre):
 
     jour_actif = st.session_state.jour_sel
     if jour_actif:
-        st.markdown(f"📅 Filtré sur : **{jour_actif}**")
+        st.markdown(f"Filtré sur : **{jour_actif}**")
         df_carte = df_filtre[df_filtre["Jour"] == jour_actif].copy()
     else:
         df_carte = df_filtre.copy()
@@ -530,7 +517,7 @@ def page_carte(df_filtre):
 
     with col_h1:
         heure_sel = st.select_slider(
-            "⏰ Chantiers démarrant à partir de :",
+            "Chantiers démarrant à partir de :",
             options=horaires_dispo,
             value="00:00",
         )
@@ -561,7 +548,7 @@ def page_carte(df_filtre):
             df_carte = df_filtre_horaire
         else:
             st.info(
-                f"ℹ️ Aucun chantier ne démarre à partir de **{heure_sel}**. "
+                f"Aucun chantier ne démarre à partir de **{heure_sel}**. "
                 "Affichage de tous les chantiers du filtre jour."
             )
 
@@ -972,21 +959,10 @@ def page_dashboard(df_filtre, df_total):
 
 def page_prediction(df, package):
     st.title("Prédire la criticité d'un chantier")
-    st.markdown(
-        "> 🎯 **Objectif** : Utiliser l'intelligence artificielle pour classer "
-        "automatiquement la priorité d'un nouveau chantier, "
-        "et ainsi aider les équipes à anticiper les impacts sur la circulation."
-    )
-    st.caption(
-        f"Modèle : **{package['nom_modele']}** | "
-        f"Accuracy : **{package['accuracy']*100:.1f}%** | "
-        f"F1-score : **{package['f1']:.3f}**"
-    )
-
     st.divider()
 
     # ── Formulaire de prédiction ──────────────
-    st.subheader("📝 Saisir les caractéristiques du chantier")
+    st.subheader("Saisir les caractéristiques du chantier")
 
     col1, col2, col3 = st.columns(3)
 
@@ -1059,7 +1035,7 @@ def page_prediction(df, package):
     if st.button("🔮 Prédire la priorité", type="primary", use_container_width=True):
 
         if pk_fin <= pk_de:
-            st.error("❌ Le PK de fin doit être supérieur au PK de début.")
+            st.error("Le PK de fin doit être supérieur au PK de début.")
             return
 
         le_infrapole = package["encoder_infrapole"]
@@ -1172,7 +1148,7 @@ def page_agent_ia(df):
         return
 
     if not GROQ_DISPONIBLE:
-        st.error("❌ La librairie groq n'est pas installée. Lance : `pip install groq`")
+        st.error("La librairie groq n'est pas installée. Lance : `pip install groq`")
         return
 
     # ── Contexte données ──────────────────────
@@ -1350,7 +1326,7 @@ RÈGLE IMPORTANTE SUR LES DATES :
                     )
 
                 except Exception as e:
-                    msg_err = f"❌ Erreur Groq : {e}"
+                    msg_err = f" Erreur Groq : {e}"
                     st.error(msg_err)
 
     # ── Reset ─────────────────────────────────
@@ -1394,7 +1370,7 @@ def main():
 
     elif page == "Prédire la criticité d'un chantier":
         if package is None:
-            st.error("❌ Modèle introuvable. Lance d'abord `python ml_model.py`.")
+            st.error(" Modèle introuvable. Lance d'abord `python ml_model.py`.")
         else:
             page_prediction(df, package)
 
