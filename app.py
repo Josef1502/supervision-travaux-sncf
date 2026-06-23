@@ -8,6 +8,7 @@ Pages :
   1. Carte interactive des travaux
   2. Tableau de bord & statistiques
   3. Prédiction ML de la priorité
+  4. FAQ Travaux (assistant IA)
 
 Usage :
     streamlit run app.py
@@ -565,13 +566,48 @@ def page_carte(df_filtre):
         st.warning("Aucun chantier pour ces filtres.")
         return
 
-    # ── Sélection chantier pour zoom ──────────
-    # La liste est construite APRÈS tous les filtres (jour + horaire)
-    df_unique = df_carte.drop_duplicates(
-        subset=["Intitulé Chantier", "CODE_LIGNE", "PK_DE", "PK_FIN", "Priorité"]
-    ).dropna(subset=["PK_DE", "PK_FIN", "CODE_LIGNE"])
+    # ── Recherche par numéro de train / sillon ──
+    st.divider()
+    recherche_train = st.text_input(
+        "🔎 Rechercher un train (numéro de sillon)",
+        placeholder="Ex : 9269",
+        help="Filtre les chantiers dont le champ Sillons Ouvrants contient ce numéro",
+    )
 
-    noms_chantiers = ["— Tous les chantiers —"] + df_unique["Intitulé Chantier"].tolist()
+    if recherche_train.strip():
+        terme = recherche_train.strip()
+        if "Sillons Ouvrants" in df_carte.columns:
+            df_recherche = df_carte[
+                df_carte["Sillons Ouvrants"]
+                .fillna("")
+                .astype(str)
+                .str.contains(terme, case=False, na=False, regex=False)
+            ].copy()
+            if not df_recherche.empty:
+                df_carte = df_recherche
+                st.success(
+                    f"🚆 **{df_carte['Intitulé Chantier'].nunique()} chantier(s)** "
+                    f"impactent le train **{terme}**"
+                )
+            else:
+                st.warning(f"Aucun chantier trouvé pour « {terme} ». Affichage de tous les chantiers.")
+        else:
+            st.error("Colonne 'Sillons Ouvrants' introuvable dans la base.")
+
+    # ── Sélection chantier pour zoom ──────────
+    # La liste est construite APRÈS tous les filtres (jour + horaire + recherche)
+    # Normalisation de la casse pour détecter les vrais doublons (ex: "Gare Souterraine" / "Gare souterraine")
+    df_unique = df_carte.dropna(subset=["PK_DE", "PK_FIN", "CODE_LIGNE"]).copy()
+    df_unique["_cle_dedup"] = (
+        df_unique["Intitulé Chantier"].astype(str).str.strip().str.lower()
+        + "|" + df_unique["CODE_LIGNE"].astype(str)
+        + "|" + df_unique["PK_DE"].astype(str)
+        + "|" + df_unique["PK_FIN"].astype(str)
+        + "|" + df_unique["Priorité"].astype(str)
+    )
+    df_unique = df_unique.drop_duplicates(subset=["_cle_dedup"]).drop(columns=["_cle_dedup"])
+
+    noms_chantiers = ["— Tous les chantiers —"] + sorted(df_unique["Intitulé Chantier"].unique().tolist())
 
     chantier_sel = st.selectbox(
         f"🔍 Zoomer sur un chantier ({len(noms_chantiers)-1} disponibles)",
@@ -589,8 +625,9 @@ def page_carte(df_filtre):
         return
 
     if chantier_sel != noms_chantiers[0]:
-        idx = noms_chantiers.index(chantier_sel) - 1
-        chantier_row = df_unique.iloc[idx]
+        # Récupération par nom (plus robuste que l'index positionnel)
+        correspondances = df_unique[df_unique["Intitulé Chantier"] == chantier_sel]
+        chantier_row = correspondances.iloc[0]
         code  = int(chantier_row["CODE_LIGNE"])
         pk_de = chantier_row["PK_DE"]
         pk_fin = chantier_row["PK_FIN"]
@@ -718,13 +755,17 @@ def page_carte(df_filtre):
         ),
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(
+        fig,
+        use_container_width=True,
+        config={"scrollZoom": True},
+    )
 
     col_a, col_b = st.columns(2)
     col_a.success(f"🛤️ **{df_pk['LIGNE RFN'].nunique()} lignes** Axe Sud-Est")
     col_b.info(f"🚧 **{nb_traces} chantiers** tracés sur les voies")
 
-    # ── Tableau filtré selon jour + horaire ───
+    # ── Tableau filtré selon jour + recherche + horaire ───
     st.divider()
     st.subheader("📋 Liste des chantiers")
 
@@ -732,6 +773,8 @@ def page_carte(df_filtre):
     filtres_actifs = []
     if jour_actif:
         filtres_actifs.append(f"📅 **{jour_actif}**")
+    if recherche_train.strip():
+        filtres_actifs.append(f"🚆 train **{recherche_train.strip()}**")
     if minutes_sel > 0:
         filtres_actifs.append(f"⏰ à partir de **{heure_sel}**")
     if filtres_actifs:
@@ -1131,21 +1174,23 @@ def page_agent_ia(df):
     )
     st.divider()
 
-    # ── Clé API ───────────────────────────────
-    api_key = st.text_input(
-        "🔑 Clé API Groq",
-        value=GROQ_API_KEY_ENV,
-        type="password",
-        placeholder="gsk_...",
-        help="Clé gratuite sur console.groq.com → API Keys"
-    )
-
-    if not api_key:
-        st.info(
-            "💡 Entre ta clé API Groq ou crée un fichier `.env` avec :\n\n"
-            "`GROQ_API_KEY=gsk_...`"
+    # ── Clé API (transparente pour l'utilisateur métier) ──
+    if GROQ_API_KEY_ENV:
+        api_key = GROQ_API_KEY_ENV
+    else:
+        st.warning(
+            "⚠️ Aucune clé API Groq configurée côté serveur. "
+            "Contacte l'administrateur de l'application pour activer l'assistant."
         )
-        return
+        with st.expander("🔧 Configuration développeur"):
+            api_key = st.text_input(
+                "Clé API Groq (temporaire, session uniquement)",
+                type="password",
+                placeholder="gsk_...",
+                help="À configurer définitivement dans .streamlit/secrets.toml"
+            )
+        if not api_key:
+            return
 
     if not GROQ_DISPONIBLE:
         st.error("La librairie groq n'est pas installée. Lance : `pip install groq`")
@@ -1200,10 +1245,14 @@ AUTRES STATS :
 
 COLONNES DISPONIBLES : Intitulé Chantier, Priorité, InfPôle, CODE_LIGNE,
 PK_DE, PK_FIN, Jour, Horaire, Horaire_fin, semaine, date_debut_semaine,
-date_fin_semaine, mois, mois_nom, duree_horaire_min, travaux_nuit
+date_fin_semaine, mois, mois_nom, duree_horaire_min, travaux_nuit,
+Sillons Ouvrants (contient les numéros de train à 4 chiffres impactés)
 
 Réponds uniquement à partir de ces données. Sois précis avec les chiffres.
 Si on te demande "quel mois a eu le plus de travaux", base-toi sur la section RÉPARTITION PAR MOIS ci-dessus.
+Si on te demande "quel train est le plus impacté", base-toi UNIQUEMENT sur la section
+"Top 10 trains" fournie dans le message (numéros à 4 chiffres extraits de Sillons Ouvrants),
+ne confonds jamais un numéro de train avec un CODE_LIGNE (qui a 5-6 chiffres).
 
 RÈGLE IMPORTANTE SUR LES DATES :
 - Chaque semaine SNCF va toujours du LUNDI au DIMANCHE (semaine ISO).
@@ -1222,7 +1271,7 @@ RÈGLE IMPORTANTE SUR LES DATES :
         "Combien de chantiers Sévérisé fortifié ?",
         "Quelle infrapôle a le plus de travaux ?",
         "Combien de travaux de nuit ?",
-        "Quels jours ont le plus de chantiers ?",
+        "Quel train est le plus impacté par les travaux ?",
         "Répartition des priorités ?",
         "Quel mois a eu le plus de travaux ?",
         "Quelle est la ligne la plus impactée ?",
@@ -1274,6 +1323,19 @@ RÈGLE IMPORTANTE SUR LES DATES :
                     if any(m in q for m in ["ligne", "rfn", "code"]):
                         top = df["CODE_LIGNE"].value_counts().head(10).to_dict()
                         stats_extra += f"\nTop 10 lignes : {top}"
+                    if any(m in q for m in ["train", "sillon"]):
+                        if "Sillons Ouvrants" in df.columns:
+                            import re as _re
+                            from collections import Counter as _Counter
+                            tous_trains = []
+                            for val in df["Sillons Ouvrants"].dropna():
+                                tous_trains.extend(_re.findall(r'\b\d{4}\b', str(val)))
+                            top_trains = _Counter(tous_trains).most_common(10)
+                            stats_extra += (
+                                "\nTop 10 trains (numéro de sillon à 4 chiffres) les plus "
+                                "souvent concernés par des travaux, par nombre de mentions : "
+                                f"{top_trains}"
+                            )
                     if any(m in q for m in ["semaine", "période", "historique", "date", "s0", "s1", "s2"]):
                         if "date_debut_semaine" in df.columns:
                             mapping_semaines = (
@@ -1326,7 +1388,7 @@ RÈGLE IMPORTANTE SUR LES DATES :
                     )
 
                 except Exception as e:
-                    msg_err = f" Erreur Groq : {e}"
+                    msg_err = f"Erreur Groq : {e}"
                     st.error(msg_err)
 
     # ── Reset ─────────────────────────────────
@@ -1341,7 +1403,7 @@ RÈGLE IMPORTANTE SUR LES DATES :
     # ── À propos ──────────────────────────────
     with st.expander("ℹ️ À propos de l'assistant"):
         st.markdown("""
-        **Modèle** : Llama 3 8B via Groq API (gratuit)
+        **Modèle** : Llama 3.1 8B via Groq API (gratuit)
         **Données** : Base SQLite des travaux SNCF Voyageurs Axe Sud-Est
         **Fonctionnement** : L'assistant reçoit un résumé statistique des données
         et répond aux questions en langage naturel.
@@ -1370,7 +1432,7 @@ def main():
 
     elif page == "Prédire la criticité d'un chantier":
         if package is None:
-            st.error(" Modèle introuvable. Lance d'abord `python ml_model.py`.")
+            st.error("Modèle introuvable. Lance d'abord `python ml_model.py`.")
         else:
             page_prediction(df, package)
 
