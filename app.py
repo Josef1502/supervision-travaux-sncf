@@ -215,10 +215,29 @@ def verifier_mot_de_passe():
     st.markdown(
         """
         <style>
+        /* Image de fond sur toute la page de connexion */
+        .stApp {
+            background-image: url("https://www.sncf-voyageurs.com/medias-publics/styles/original/public/2023-08/tgv-mer-header.jpg.webp?VersionId=kIICW3n96pY1B7TzwgRQuXzn4o1plkNq&itok=bBCe8GnP");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+        /* Overlay sombre pour lisibilité du formulaire */
+        .stApp::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(10, 10, 30, 0.55);
+            z-index: 0;
+            pointer-events: none;
+        }
         div[data-testid="stVerticalBlockBorderWrapper"]:has(div.marqueur-connexion) {
-            background: #1A1A2E;
+            background: rgba(26, 26, 46, 0.92);
             border-radius: 14px;
-            box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+            backdrop-filter: blur(6px);
         }
         div[data-testid="stVerticalBlockBorderWrapper"]:has(div.marqueur-connexion) p,
         div[data-testid="stVerticalBlockBorderWrapper"]:has(div.marqueur-connexion) label {
