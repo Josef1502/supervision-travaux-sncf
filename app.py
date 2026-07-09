@@ -566,14 +566,38 @@ def page_carte(df_filtre):
         st.warning("Aucun chantier pour ces filtres.")
         return
 
-    # ── Recherche par numéro de train / sillon ──
+    # ── Recherche train + Zoom chantier côte à côte ──
     st.divider()
-    recherche_train = st.text_input(
-        "🔎 Rechercher un train (numéro de sillon)",
-        placeholder="Ex : 9269",
-        help="Filtre les chantiers dont le champ Sillons Ouvrants contient ce numéro",
-    )
 
+    # Construire df_unique ici pour pouvoir l'utiliser dans la colonne droite
+    df_unique = df_carte.dropna(subset=["PK_DE", "PK_FIN", "CODE_LIGNE"]).copy()
+    df_unique["_cle_dedup"] = (
+        df_unique["Intitulé Chantier"].astype(str).str.strip().str.lower()
+        + "|" + df_unique["CODE_LIGNE"].astype(str)
+        + "|" + df_unique["PK_DE"].astype(str)
+        + "|" + df_unique["PK_FIN"].astype(str)
+        + "|" + df_unique["Priorité"].astype(str)
+    )
+    df_unique = df_unique.drop_duplicates(subset=["_cle_dedup"]).drop(columns=["_cle_dedup"])
+    noms_chantiers = ["— Tous les chantiers —"] + sorted(df_unique["Intitulé Chantier"].unique().tolist())
+
+    col_search, col_zoom = st.columns(2)
+
+    with col_search:
+        recherche_train = st.text_input(
+            "🔎 Rechercher un train (numéro de sillon)",
+            placeholder="Ex : 9269",
+            help="Filtre les chantiers dont le champ Sillons Ouvrants contient ce numéro",
+        )
+
+    with col_zoom:
+        chantier_sel = st.selectbox(
+            f"🔍 Zoomer sur un chantier ({len(noms_chantiers)-1} disponibles)",
+            noms_chantiers,
+            index=0,
+        )
+
+    # Appliquer le filtre train si renseigné
     if recherche_train.strip():
         terme = recherche_train.strip()
         if "Sillons Ouvrants" in df_carte.columns:
@@ -585,6 +609,16 @@ def page_carte(df_filtre):
             ].copy()
             if not df_recherche.empty:
                 df_carte = df_recherche
+                # Reconstruire df_unique après filtre train
+                df_unique = df_carte.dropna(subset=["PK_DE", "PK_FIN", "CODE_LIGNE"]).copy()
+                df_unique["_cle_dedup"] = (
+                    df_unique["Intitulé Chantier"].astype(str).str.strip().str.lower()
+                    + "|" + df_unique["CODE_LIGNE"].astype(str)
+                    + "|" + df_unique["PK_DE"].astype(str)
+                    + "|" + df_unique["PK_FIN"].astype(str)
+                    + "|" + df_unique["Priorité"].astype(str)
+                )
+                df_unique = df_unique.drop_duplicates(subset=["_cle_dedup"]).drop(columns=["_cle_dedup"])
                 st.success(
                     f"🚆 **{df_carte['Intitulé Chantier'].nunique()} chantier(s)** "
                     f"impactent le train **{terme}**"
@@ -593,27 +627,6 @@ def page_carte(df_filtre):
                 st.warning(f"Aucun chantier trouvé pour « {terme} ». Affichage de tous les chantiers.")
         else:
             st.error("Colonne 'Sillons Ouvrants' introuvable dans la base.")
-
-    # ── Sélection chantier pour zoom ──────────
-    # La liste est construite APRÈS tous les filtres (jour + horaire + recherche)
-    # Normalisation de la casse pour détecter les vrais doublons (ex: "Gare Souterraine" / "Gare souterraine")
-    df_unique = df_carte.dropna(subset=["PK_DE", "PK_FIN", "CODE_LIGNE"]).copy()
-    df_unique["_cle_dedup"] = (
-        df_unique["Intitulé Chantier"].astype(str).str.strip().str.lower()
-        + "|" + df_unique["CODE_LIGNE"].astype(str)
-        + "|" + df_unique["PK_DE"].astype(str)
-        + "|" + df_unique["PK_FIN"].astype(str)
-        + "|" + df_unique["Priorité"].astype(str)
-    )
-    df_unique = df_unique.drop_duplicates(subset=["_cle_dedup"]).drop(columns=["_cle_dedup"])
-
-    noms_chantiers = ["— Tous les chantiers —"] + sorted(df_unique["Intitulé Chantier"].unique().tolist())
-
-    chantier_sel = st.selectbox(
-        f"🔍 Zoomer sur un chantier ({len(noms_chantiers)-1} disponibles)",
-        noms_chantiers,
-        index=0,
-    )
 
     # Paramètres de centrage — France entière par défaut
     centre_lat, centre_lon, zoom = 46.8, 2.3, 6
@@ -722,16 +735,16 @@ def page_carte(df_filtre):
             lat=[centre_lat], lon=[centre_lon],
             mode="markers+text",
             marker=dict(size=20, color="#FF6B00"),
-            text=[""],
+            text=["📍"],
             textposition="top center",
             hovertemplate=(
-                f"<b> {chantier_row['Intitulé Chantier']}</b><br>"
+                f"<b>📍 {chantier_row['Intitulé Chantier']}</b><br>"
                 f"Ligne {int(chantier_row['CODE_LIGNE'])} | "
                 f"PK {chantier_row['PK_DE']}→{chantier_row['PK_FIN']}<br>"
                 f"Priorité : {chantier_row['Priorité']}"
                 "<extra></extra>"
             ),
-            name=" Chantier sélectionné",
+            name="📍 Chantier sélectionné",
             showlegend=True,
         ))
 
@@ -763,12 +776,12 @@ def page_carte(df_filtre):
     )
 
     col_a, col_b = st.columns(2)
-    col_a.success(f" **{df_pk['LIGNE RFN'].nunique()} lignes** Axe Sud-Est")
-    col_b.info(f" **{nb_traces} chantiers** tracés sur les voies")
+    col_a.success(f"🛤️ **{df_pk['LIGNE RFN'].nunique()} lignes** Axe Sud-Est")
+    col_b.info(f"🚧 **{nb_traces} chantiers** tracés sur les voies")
 
     # ── Tableau filtré selon jour + recherche + horaire ───
     st.divider()
-    st.subheader("Liste des chantiers")
+    st.subheader("📋 Liste des chantiers")
 
     # Info filtres actifs
     filtres_actifs = []
@@ -807,7 +820,7 @@ def page_dashboard(df_filtre, df_total):
     st.caption("Analyse statistique des travaux ferroviaires — Axe Sud-Est")
 
     # ── KPI ──────────────────────────────────
-    st.subheader("Indicateurs clés")
+    st.subheader("📈 Indicateurs clés")
     col1, col2, col3, col4, col5 = st.columns(5)
     col1.metric("Total chantiers", f"{len(df_filtre):,}", f"{len(df_filtre) - len(df_total):,}")
     col2.metric("Semaines", df_filtre["semaine"].nunique())
@@ -1173,7 +1186,8 @@ def page_prediction(df, package):
 def page_agent_ia(df):
     st.title("FAQ Travaux")
     st.markdown(
-        "> Posez vos questions sur les travaux ferroviaires."
+        "> 🎯 Posez vos questions sur les travaux ferroviaires en langage naturel. "
+        "L'assistant analyse la base de données et vous répond instantanément."
     )
 
     # ── Vidéo explicative ─────────────────────
