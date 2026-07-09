@@ -323,39 +323,64 @@ def verifier_mot_de_passe():
                 <div class="marqueur-connexion"></div>
             </div>
         </div>
+
+        <style>
+        /* Formulaire Streamlit positionné par-dessus la login-box */
+        [data-testid="stForm"] {
+            position: fixed !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, 30%) !important;
+            width: min(400px, 80vw) !important;
+            background: transparent !important;
+            border: none !important;
+            z-index: 100 !important;
+            padding: 0 !important;
+        }
+        [data-testid="stForm"] > div {
+            background: transparent !important;
+            border: none !important;
+            padding: 0 !important;
+        }
+        /* Input mot de passe */
+        [data-testid="stForm"] input[type="password"] {
+            background: rgba(255,255,255,0.18) !important;
+            color: white !important;
+            border: 1px solid rgba(255,255,255,0.4) !important;
+            border-radius: 8px !important;
+        }
+        [data-testid="stForm"] input[type="password"]::placeholder {
+            color: rgba(255,255,255,0.7) !important;
+        }
+        /* Message d'erreur */
+        [data-testid="stForm"] [data-testid="stAlert"] {
+            background: rgba(192,39,45,0.3) !important;
+            border-left: 4px solid #C0272D !important;
+        }
+        </style>
         """,
         unsafe_allow_html=True,
     )
 
-    # Formulaire Streamlit centré avec colonnes
-    col1, col2, col3 = st.columns([1, 1.4, 1])
-    with col2:
-        st.markdown("<div style='margin-top: 52vh;'></div>", unsafe_allow_html=True)
-        with st.form("login_form"):
-            mdp_saisi = st.text_input(
-                "Mot de passe",
-                type="password",
-                placeholder="Entrez le mot de passe d'accès",
-                label_visibility="collapsed",
-            )
-            submit = st.form_submit_button(
-                "Accéder à la plateforme",
-                use_container_width=True,
-                type="primary",
-            )
-            if submit:
-                if mdp_saisi == mdp_attendu:
-                    st.session_state.authentifie = True
-                    st.rerun()
-                else:
-                    st.error("Mot de passe incorrect.")
-
-        st.markdown(
-            "<p style='color:#BBBBBB; font-size:0.75rem; text-align:center; "
-            "text-shadow: 0 1px 4px rgba(0,0,0,0.9);'>"
-            "Accès réservé aux équipes SNCF Voyageurs — Axe Sud-Est</p>",
-            unsafe_allow_html=True,
+    # Formulaire Streamlit (rendu au-dessus de la login-box via CSS fixed)
+    with st.form("login_form"):
+        mdp_saisi = st.text_input(
+            "Mot de passe",
+            type="password",
+            placeholder="Entrez le mot de passe d'accès",
+            label_visibility="collapsed",
         )
+        submit = st.form_submit_button(
+            "Accéder à la plateforme",
+            use_container_width=True,
+            type="primary",
+        )
+        if submit:
+            if mdp_saisi == mdp_attendu:
+                st.session_state.authentifie = True
+                st.rerun()
+            else:
+                st.error("Mot de passe incorrect.")
 
     return False
 
