@@ -272,8 +272,10 @@ def verifier_mot_de_passe():
             )
             st.markdown(
                 "<span class='badge-quai'>AXE SUD-EST · ACCÈS RESTREINT</span><br>"
-                "<h2 style='color:white; margin-top:0.2rem; margin-bottom:0.2rem;'>Supervision Travaux</h2>"
-                "<p style='color:#A9A9BD; margin-bottom:1.4rem;'>Plateforme de pilotage des chantiers ferroviaires</p>",
+                "<h2 style='color:white; margin-top:0.2rem; margin-bottom:0.2rem; "
+                "text-shadow: 0 2px 8px rgba(0,0,0,0.8);'>Supervision Travaux</h2>"
+                "<p style='color:#FFFFFF; margin-bottom:1.4rem; "
+                "text-shadow: 0 1px 6px rgba(0,0,0,0.9);'>Plateforme de pilotage des chantiers ferroviaires</p>",
                 unsafe_allow_html=True
             )
 
@@ -293,7 +295,8 @@ def verifier_mot_de_passe():
                         st.error("Mot de passe incorrect.")
 
             st.markdown(
-                "<p style='color:#6B6B85; font-size:0.78rem; text-align:center; margin-top:0.8rem;'>"
+                "<p style='color:#E0E0E0; font-size:0.78rem; text-align:center; margin-top:0.8rem; "
+                "text-shadow: 0 1px 4px rgba(0,0,0,0.9);'>"
                 "Accès réservé aux équipes SNCF Voyageurs — Axe Sud-Est"
                 "</p>",
                 unsafe_allow_html=True
