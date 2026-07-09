@@ -215,7 +215,25 @@ def verifier_mot_de_passe():
     st.markdown(
         """
         <style>
-        /* Image de fond sur toute la page de connexion */
+        /* Masquer le padding Streamlit et empêcher le scroll */
+        html, body, .stApp {
+            height: 100% !important;
+            overflow: hidden !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        .stApp > div:first-child {
+            height: 100vh !important;
+            overflow: hidden !important;
+        }
+        /* Masquer le header Streamlit */
+        header[data-testid="stHeader"] { display: none !important; }
+        /* Masquer padding bloc principal */
+        .block-container {
+            padding: 0 !important;
+            max-width: 100% !important;
+        }
+        /* Image de fond plein écran */
         .stApp {
             background-image: url("https://www.sncf-voyageurs.com/medias-publics/styles/original/public/2023-08/tgv-mer-header.jpg.webp?VersionId=kIICW3n96pY1B7TzwgRQuXzn4o1plkNq&itok=bBCe8GnP");
             background-size: cover;
@@ -223,7 +241,7 @@ def verifier_mot_de_passe():
             background-repeat: no-repeat;
             background-attachment: fixed;
         }
-        /* Overlay sombre pour lisibilité du formulaire */
+        /* Overlay sombre */
         .stApp::before {
             content: "";
             position: fixed;
@@ -233,20 +251,26 @@ def verifier_mot_de_passe():
             z-index: 0;
             pointer-events: none;
         }
-        div[data-testid="stVerticalBlockBorderWrapper"]:has(div.marqueur-connexion) {
-            background: rgba(26, 26, 46, 0.92);
-            border-radius: 14px;
-            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
-            backdrop-filter: blur(6px);
+        /* Centrage vertical du formulaire */
+        .login-wrapper {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            pointer-events: none;
         }
-        div[data-testid="stVerticalBlockBorderWrapper"]:has(div.marqueur-connexion) p,
-        div[data-testid="stVerticalBlockBorderWrapper"]:has(div.marqueur-connexion) label {
-            color: #F0F0F0 !important;
-        }
-        /* Forcer couleur blanche sur h2 dans le formulaire de connexion */
-        div[data-testid="stVerticalBlockBorderWrapper"]:has(div.marqueur-connexion) h2 {
-            color: #FFFFFF !important;
-            text-shadow: 0 2px 12px rgba(0,0,0,1) !important;
+        .login-box {
+            pointer-events: all;
+            width: min(480px, 90vw);
+            text-align: center;
+            padding: 2rem 2.5rem;
+            background: rgba(15, 15, 35, 0.75);
+            border-radius: 16px;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 16px 48px rgba(0,0,0,0.5);
         }
         .badge-quai {
             display: inline-block;
@@ -259,51 +283,54 @@ def verifier_mot_de_passe():
             border-radius: 4px;
             margin-bottom: 0.8rem;
         }
+        .login-title {
+            color: #FFFFFF;
+            font-family: 'Archivo Expanded', sans-serif;
+            font-size: clamp(1.4rem, 4vw, 2rem);
+            font-weight: 800;
+            margin: 0.3rem 0 0.2rem 0;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.9);
+        }
+        .login-subtitle {
+            color: #DDDDDD;
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 1px 6px rgba(0,0,0,0.8);
+        }
+        .login-footer {
+            color: #BBBBBB;
+            font-size: 0.75rem;
+            margin-top: 1rem;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+        }
+        /* Inputs et boutons dans le formulaire */
+        .login-box input {
+            background: rgba(255,255,255,0.15) !important;
+            color: white !important;
+            border: 1px solid rgba(255,255,255,0.3) !important;
+            border-radius: 8px !important;
+        }
         </style>
+
+        <div class="login-wrapper">
+            <div class="login-box">
+                <img src="https://upload.wikimedia.org/wikipedia/fr/thumb/5/52/Logotype_SNCF_Voyageurs_2020.svg/1280px-Logotype_SNCF_Voyageurs_2020.svg.png?_=20221023111731"
+                     width="160" style="margin-bottom:0.8rem;" />
+                <br>
+                <span class="badge-quai">AXE SUD-EST · ACCÈS RESTREINT</span>
+                <p class="login-title">Supervision Travaux</p>
+                <p class="login-subtitle">Plateforme de pilotage des chantiers ferroviaires</p>
+                <div class="marqueur-connexion"></div>
+            </div>
+        </div>
         """,
         unsafe_allow_html=True,
     )
 
-    # CSS pour centrer le formulaire sur l'image
-    st.markdown("""
-        <style>
-        .bloc-connexion {
-            max-width: 480px;
-            margin: 8vh auto 0 auto;
-            text-align: center;
-        }
-        </style>
-        <div class="bloc-connexion">
-            <div class="marqueur-connexion"></div>
-        </div>
-    """, unsafe_allow_html=True)
-
-    col1, col2, col3 = st.columns([1, 1.6, 1])
+    # Formulaire Streamlit centré avec colonnes
+    col1, col2, col3 = st.columns([1, 1.4, 1])
     with col2:
-        st.markdown("<div style='text-align:center'>", unsafe_allow_html=True)
-        st.image(
-            "https://upload.wikimedia.org/wikipedia/fr/thumb/5/52/Logotype_SNCF_Voyageurs_2020.svg/1280px-Logotype_SNCF_Voyageurs_2020.svg.png?_=20221023111731",
-            width=180,
-        )
-        st.markdown(
-            "<div style='text-align:center; margin-bottom: 1rem;'>"
-            "<span class='badge-quai'>AXE SUD-EST · ACCÈS RESTREINT</span><br><br>"
-            "<span style='"
-            "color: #FFFFFF; "
-            "font-family: Archivo Expanded, sans-serif; "
-            "font-size: 2rem; "
-            "font-weight: 800; "
-            "display: block; "
-            "margin-bottom: 0.3rem;"
-            "text-shadow: 0 2px 12px rgba(0,0,0,1), 0 0 4px rgba(0,0,0,1);'>"
-            "Supervision Travaux"
-            "</span>"
-            "<p style='color:#FFFFFF; margin-bottom:1.4rem; "
-            "text-shadow: 0 1px 6px rgba(0,0,0,0.9);'>Plateforme de pilotage des chantiers ferroviaires</p>"
-            "</div>",
-            unsafe_allow_html=True
-        )
-
+        st.markdown("<div style='margin-top: 52vh;'></div>", unsafe_allow_html=True)
         with st.form("login_form"):
             mdp_saisi = st.text_input(
                 "Mot de passe",
@@ -311,8 +338,11 @@ def verifier_mot_de_passe():
                 placeholder="Entrez le mot de passe d'accès",
                 label_visibility="collapsed",
             )
-            submit = st.form_submit_button("Accéder à la plateforme", use_container_width=True, type="primary")
-
+            submit = st.form_submit_button(
+                "Accéder à la plateforme",
+                use_container_width=True,
+                type="primary",
+            )
             if submit:
                 if mdp_saisi == mdp_attendu:
                     st.session_state.authentifie = True
@@ -321,13 +351,11 @@ def verifier_mot_de_passe():
                     st.error("Mot de passe incorrect.")
 
         st.markdown(
-            "<p style='color:#E0E0E0; font-size:0.78rem; text-align:center; margin-top:0.8rem; "
+            "<p style='color:#BBBBBB; font-size:0.75rem; text-align:center; "
             "text-shadow: 0 1px 4px rgba(0,0,0,0.9);'>"
-            "Accès réservé aux équipes SNCF Voyageurs — Axe Sud-Est"
-            "</p>",
-            unsafe_allow_html=True
+            "Accès réservé aux équipes SNCF Voyageurs — Axe Sud-Est</p>",
+            unsafe_allow_html=True,
         )
-        st.markdown("</div>", unsafe_allow_html=True)
 
     return False
 
