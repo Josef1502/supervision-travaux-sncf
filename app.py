@@ -616,7 +616,7 @@ def page_carte(df_filtre):
     )
 
     # Paramètres de centrage — France entière par défaut
-    centre_lat, centre_lon, zoom = 46.8, 2.3, 5
+    centre_lat, centre_lon, zoom = 46.8, 2.3, 6
     chantier_row = None
 
     df_pk = charger_lignes_pk()
@@ -722,25 +722,26 @@ def page_carte(df_filtre):
             lat=[centre_lat], lon=[centre_lon],
             mode="markers+text",
             marker=dict(size=20, color="#FF6B00"),
-            text=["📍"],
+            text=[""],
             textposition="top center",
             hovertemplate=(
-                f"<b>📍 {chantier_row['Intitulé Chantier']}</b><br>"
+                f"<b> {chantier_row['Intitulé Chantier']}</b><br>"
                 f"Ligne {int(chantier_row['CODE_LIGNE'])} | "
                 f"PK {chantier_row['PK_DE']}→{chantier_row['PK_FIN']}<br>"
                 f"Priorité : {chantier_row['Priorité']}"
                 "<extra></extra>"
             ),
-            name="📍 Chantier sélectionné",
+            name=" Chantier sélectionné",
             showlegend=True,
         ))
 
     # ── Mise en page ──────────────────────────
     fig.update_layout(
         mapbox=dict(
-            style="carto-positron",
+            style="open-street-map",
             center={"lat": centre_lat, "lon": centre_lon},
             zoom=zoom,
+            bounds={"west": -5.5, "east": 9.5, "south": 41.0, "north": 51.5},
         ),
         margin={"r":0,"t":0,"l":0,"b":0},
         height=640,
@@ -762,12 +763,12 @@ def page_carte(df_filtre):
     )
 
     col_a, col_b = st.columns(2)
-    col_a.success(f"🛤️ **{df_pk['LIGNE RFN'].nunique()} lignes** Axe Sud-Est")
-    col_b.info(f"🚧 **{nb_traces} chantiers** tracés sur les voies")
+    col_a.success(f" **{df_pk['LIGNE RFN'].nunique()} lignes** Axe Sud-Est")
+    col_b.info(f" **{nb_traces} chantiers** tracés sur les voies")
 
     # ── Tableau filtré selon jour + recherche + horaire ───
     st.divider()
-    st.subheader("📋 Liste des chantiers")
+    st.subheader("Liste des chantiers")
 
     # Info filtres actifs
     filtres_actifs = []
@@ -806,7 +807,7 @@ def page_dashboard(df_filtre, df_total):
     st.caption("Analyse statistique des travaux ferroviaires — Axe Sud-Est")
 
     # ── KPI ──────────────────────────────────
-    st.subheader("📈 Indicateurs clés")
+    st.subheader("Indicateurs clés")
     col1, col2, col3, col4, col5 = st.columns(5)
     col1.metric("Total chantiers", f"{len(df_filtre):,}", f"{len(df_filtre) - len(df_total):,}")
     col2.metric("Semaines", df_filtre["semaine"].nunique())
@@ -927,31 +928,34 @@ def page_dashboard(df_filtre, df_total):
     col_g3, col_d3 = st.columns(2)
 
     with col_g3:
-        st.subheader("Top 5 lignes les plus impactées")
-        top_lignes = (
-            df_filtre.groupby("CODE_LIGNE")
-            .size()
-            .reset_index(name="Nombre")
-            .sort_values("Nombre", ascending=False)
-            .head(5)
-        )
+        st.subheader("Top 5 trains les plus impactés")
+        st.caption("Numéros de sillon à 4 chiffres — colonne Sillons Ouvrants")
 
-        for i, row in enumerate(top_lignes.itertuples(), start=1):
-            code = int(row.CODE_LIGNE)
-            nb = row.Nombre
-            pct = nb / len(df_filtre) * 100
-            st.markdown(
-                f"<div style='display:flex; align-items:center; gap:14px; "
-                f"padding:10px 14px; margin-bottom:6px; background:white; "
-                f"border-radius:8px; border-left:4px solid #C0272D;'>"
-                f"<span style='font-family:Roboto Mono, monospace; font-size:18px; "
-                f"font-weight:600; color:#C0272D; min-width:24px;'>#{i}</span>"
-                f"<span style='font-family:Roboto Mono, monospace; font-size:16px; "
-                f"font-weight:600; flex:1;'>Ligne {code}</span>"
-                f"<span style='font-size:14px; color:#4A5568;'>{nb} chantiers ({pct:.1f}%)</span>"
-                f"</div>",
-                unsafe_allow_html=True,
-            )
+        import re as _re
+        from collections import Counter as _Counter
+
+        tous_trains = []
+        for val in df_filtre["Sillons Ouvrants"].dropna():
+            tous_trains.extend(_re.findall(r'\b\d{4}\b', str(val)))
+
+        top_trains = _Counter(tous_trains).most_common(5)
+
+        if top_trains:
+            for i, (train, nb) in enumerate(top_trains, start=1):
+                st.markdown(
+                    f"<div style='display:flex; align-items:center; gap:14px; "
+                    f"padding:10px 14px; margin-bottom:6px; background:white; "
+                    f"border-radius:8px; border-left:4px solid #C0272D;'>"
+                    f"<span style='font-family:Roboto Mono, monospace; font-size:18px; "
+                    f"font-weight:600; color:#C0272D; min-width:24px;'>#{i}</span>"
+                    f"<span style='font-family:Roboto Mono, monospace; font-size:16px; "
+                    f"font-weight:600; flex:1;'>Train {train}</span>"
+                    f"<span style='font-size:14px; color:#4A5568;'>{nb} mention(s)</span>"
+                    f"</div>",
+                    unsafe_allow_html=True,
+                )
+        else:
+            st.info("Aucun numéro de sillon trouvé pour ces filtres.")
 
     with col_d3:
         st.subheader("Top 5 infrapôles — chantiers critiques")
@@ -1169,9 +1173,23 @@ def page_prediction(df, package):
 def page_agent_ia(df):
     st.title("FAQ Travaux")
     st.markdown(
-        "> 🎯 Posez vos questions sur les travaux ferroviaires en langage naturel. "
-        "L'assistant analyse la base de données et vous répond instantanément."
+        "> Posez vos questions sur les travaux ferroviaires."
     )
+
+    # ── Vidéo explicative ─────────────────────
+    with st.expander("🎬 Voir la vidéo de présentation de l'application"):
+        # Remplace l'URL ci-dessous par le lien YouTube, Vimeo ou le chemin local de ta vidéo
+        # Exemples :
+        #   st.video("https://www.youtube.com/watch?v=TON_ID")
+        #   st.video("https://vimeo.com/TON_ID")
+        #   st.video("demo_app.mp4")  # si fichier local à la racine du projet
+        VIDEO_URL = "https://www.youtube.com/watch?v=TON_ID"
+        st.video(VIDEO_URL)
+        st.caption(
+            "Présentation de l'application de supervision des travaux ferroviaires "
+            "SNCF Voyageurs — Axe Sud-Est"
+        )
+
     st.divider()
 
     # ── Clé API (transparente pour l'utilisateur métier) ──
