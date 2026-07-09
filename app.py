@@ -264,57 +264,70 @@ def verifier_mot_de_passe():
         unsafe_allow_html=True,
     )
 
-    col1, col2, col3 = st.columns([1, 1.3, 1])
+    # CSS pour centrer le formulaire sur l'image
+    st.markdown("""
+        <style>
+        .bloc-connexion {
+            max-width: 480px;
+            margin: 8vh auto 0 auto;
+            text-align: center;
+        }
+        </style>
+        <div class="bloc-connexion">
+            <div class="marqueur-connexion"></div>
+        </div>
+    """, unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns([1, 1.6, 1])
     with col2:
-        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("<div style='text-align:center'>", unsafe_allow_html=True)
+        st.image(
+            "https://upload.wikimedia.org/wikipedia/fr/thumb/5/52/Logotype_SNCF_Voyageurs_2020.svg/1280px-Logotype_SNCF_Voyageurs_2020.svg.png?_=20221023111731",
+            width=180,
+        )
+        st.markdown(
+            "<div style='text-align:center; margin-bottom: 1rem;'>"
+            "<span class='badge-quai'>AXE SUD-EST · ACCÈS RESTREINT</span><br><br>"
+            "<span style='"
+            "color: #FFFFFF; "
+            "font-family: Archivo Expanded, sans-serif; "
+            "font-size: 2rem; "
+            "font-weight: 800; "
+            "display: block; "
+            "margin-bottom: 0.3rem;"
+            "text-shadow: 0 2px 12px rgba(0,0,0,1), 0 0 4px rgba(0,0,0,1);'>"
+            "Supervision Travaux"
+            "</span>"
+            "<p style='color:#FFFFFF; margin-bottom:1.4rem; "
+            "text-shadow: 0 1px 6px rgba(0,0,0,0.9);'>Plateforme de pilotage des chantiers ferroviaires</p>"
+            "</div>",
+            unsafe_allow_html=True
+        )
 
-        with st.container(border=True):
-            st.markdown('<div class="marqueur-connexion"></div>', unsafe_allow_html=True)
-
-            st.image(
-                "https://upload.wikimedia.org/wikipedia/fr/thumb/5/52/Logotype_SNCF_Voyageurs_2020.svg/1280px-Logotype_SNCF_Voyageurs_2020.svg.png?_=20221023111731",
-                width=200,
+        with st.form("login_form"):
+            mdp_saisi = st.text_input(
+                "Mot de passe",
+                type="password",
+                placeholder="Entrez le mot de passe d'accès",
+                label_visibility="collapsed",
             )
-            st.markdown(
-                "<span class='badge-quai'>AXE SUD-EST · ACCÈS RESTREINT</span><br>"
-                "<span style='"
-                "color: #FFFFFF; "
-                "font-family: Archivo Expanded, sans-serif; "
-                "font-size: 1.8rem; "
-                "font-weight: 800; "
-                "margin-top:0.2rem; "
-                "margin-bottom:0.2rem; "
-                "display: block; "
-                "text-shadow: 0 2px 12px rgba(0,0,0,1), 0 0 4px rgba(0,0,0,1);'>"
-                "Supervision Travaux"
-                "</span>"
-                "<p style='color:#FFFFFF; margin-bottom:1.4rem; "
-                "text-shadow: 0 1px 6px rgba(0,0,0,0.9);'>Plateforme de pilotage des chantiers ferroviaires</p>",
-                unsafe_allow_html=True
-            )
+            submit = st.form_submit_button("Accéder à la plateforme", use_container_width=True, type="primary")
 
-            with st.form("login_form"):
-                mdp_saisi = st.text_input(
-                    "Mot de passe",
-                    type="password",
-                    placeholder="Entrez le mot de passe d'accès",
-                )
-                submit = st.form_submit_button("Accéder à la plateforme", use_container_width=True, type="primary")
+            if submit:
+                if mdp_saisi == mdp_attendu:
+                    st.session_state.authentifie = True
+                    st.rerun()
+                else:
+                    st.error("Mot de passe incorrect.")
 
-                if submit:
-                    if mdp_saisi == mdp_attendu:
-                        st.session_state.authentifie = True
-                        st.rerun()
-                    else:
-                        st.error("Mot de passe incorrect.")
-
-            st.markdown(
-                "<p style='color:#E0E0E0; font-size:0.78rem; text-align:center; margin-top:0.8rem; "
-                "text-shadow: 0 1px 4px rgba(0,0,0,0.9);'>"
-                "Accès réservé aux équipes SNCF Voyageurs — Axe Sud-Est"
-                "</p>",
-                unsafe_allow_html=True
-            )
+        st.markdown(
+            "<p style='color:#E0E0E0; font-size:0.78rem; text-align:center; margin-top:0.8rem; "
+            "text-shadow: 0 1px 4px rgba(0,0,0,0.9);'>"
+            "Accès réservé aux équipes SNCF Voyageurs — Axe Sud-Est"
+            "</p>",
+            unsafe_allow_html=True
+        )
+        st.markdown("</div>", unsafe_allow_html=True)
 
     return False
 
