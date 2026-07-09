@@ -277,19 +277,12 @@ def verifier_mot_de_passe():
             )
             st.markdown(
                 "<span class='badge-quai'>AXE SUD-EST · ACCÈS RESTREINT</span><br>"
-                "<div style='"
-                "background: rgba(0,0,0,0.55); "
-                "border-radius: 8px; "
-                "padding: 10px 16px; "
-                "margin-bottom: 0.4rem; "
-                "display: inline-block;'>"
                 "<h2 style='"
                 "color: #FFFFFF !important; "
-                "margin: 0; "
+                "margin-top:0.2rem; margin-bottom:0.2rem; "
                 "text-shadow: 0 2px 12px rgba(0,0,0,1), 0 0 4px rgba(0,0,0,1);'>"
                 "Supervision Travaux"
                 "</h2>"
-                "</div><br>"
                 "<p style='color:#FFFFFF; margin-bottom:1.4rem; "
                 "text-shadow: 0 1px 6px rgba(0,0,0,0.9);'>Plateforme de pilotage des chantiers ferroviaires</p>",
                 unsafe_allow_html=True
