@@ -238,6 +238,37 @@ def lire_fichier(path: Path) -> pd.DataFrame:
         for c in df.columns
     ]
 
+    # ── Normalisation multi-années ─────────────────────────────────────────
+    # PK_DEB (2024, 2025) → PK_DE (2026)
+    if "PK_DEB" in df.columns and "PK_DE" not in df.columns:
+        df = df.rename(columns={"PK_DEB": "PK_DE"})
+
+    # PK_debut ou PK_Debut → PK_DE (variante possible 2024)
+    for alias in ["PK_debut", "PK_Debut", "PK début", "PK_DEBUT"]:
+        if alias in df.columns and "PK_DE" not in df.columns:
+            df = df.rename(columns={alias: "PK_DE"})
+
+    # PK_fin ou variantes → PK_FIN (variante possible 2024)
+    for alias in ["PK_fin", "PK_Fin", "PK fin", "PK_FIN_"]:
+        if alias in df.columns and "PK_FIN" not in df.columns:
+            df = df.rename(columns={alias: "PK_FIN"})
+
+    # Supprimer les colonnes supplémentaires non communes (noms de colonnes
+    # présents dans certaines années mais absents d'autres, qui cassent la
+    # concaténation pandas). On garde uniquement les colonnes utilisées ensuite.
+    COLONNES_CIBLES = {
+        "Intitulé Chantier", "InfPôle", "Priorité", "Infos Chantier",
+        "Type_Interception", "CODE_LIGNE", "PK_DE", "PK_FIN",
+        "Sillons Ouvrants", "Jour", "Horaire", "Jour_fin", "Horaire_fin",
+        "semaine", "fichier_source",
+        "date_debut_semaine", "date_fin_semaine",
+        "mois", "mois_nom", "semaine_label",
+    }
+    colonnes_a_supprimer = [c for c in df.columns if c not in COLONNES_CIBLES]
+    if colonnes_a_supprimer:
+        df = df.drop(columns=colonnes_a_supprimer)
+    # ──────────────────────────────────────────────────────────────────────
+
     semaine = extraire_semaine(path.name)
     df["semaine"] = semaine
     df["fichier_source"] = path.name
