@@ -344,13 +344,13 @@ def verifier_mot_de_passe():
         }
         /* Input mot de passe */
         [data-testid="stForm"] input[type="password"] {
-            background: rgba(255,255,255,0.18) !important;
-            color: white !important;
-            border: 1px solid rgba(255,255,255,0.4) !important;
+            background: rgba(255,255,255,0.95) !important;
+            color: #1A1A1A !important;
+            border: 1px solid rgba(255,255,255,0.6) !important;
             border-radius: 8px !important;
         }
         [data-testid="stForm"] input[type="password"]::placeholder {
-            color: rgba(255,255,255,0.7) !important;
+            color: #666666 !important;
         }
         /* Message d'erreur */
         [data-testid="stForm"] [data-testid="stAlert"] {
@@ -425,7 +425,7 @@ def trier_semaines(liste_semaines):
 # CHARGEMENT DES DONNÉES
 # ─────────────────────────────────────────────
 
-@st.cache_data
+@st.cache_data(ttl=300)
 def charger_donnees():
     conn = sqlite3.connect(DB_PATH)
     df = pd.read_sql("SELECT * FROM travaux", conn)
