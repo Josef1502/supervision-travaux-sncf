@@ -765,7 +765,7 @@ def page_carte(df_filtre):
         grp = grp.dropna(subset=["LATITUDE","LONGITUDE"])
         if len(grp) < 2:
             continue
-        fig.add_trace(go.Scattermapbox(
+        fig.add_trace(go.Scattermap(
             lat=grp["LATITUDE"].tolist(),
             lon=grp["LONGITUDE"].tolist(),
             mode="lines",
@@ -820,7 +820,7 @@ def page_carte(df_filtre):
             nb_traces += 1
 
         if lats_all:
-            fig.add_trace(go.Scattermapbox(
+            fig.add_trace(go.Scattermap(
                 lat=lats_all, lon=lons_all,
                 mode="lines",
                 line=dict(width=LARGEURS.get(priorite,5), color=couleur),
@@ -833,7 +833,7 @@ def page_carte(df_filtre):
 
     # 3. MARQUEUR chantier sélectionné
     if chantier_row is not None:
-        fig.add_trace(go.Scattermapbox(
+        fig.add_trace(go.Scattermap(
             lat=[centre_lat], lon=[centre_lon],
             mode="markers+text",
             marker=dict(size=20, color="#FF6B00"),
@@ -852,7 +852,7 @@ def page_carte(df_filtre):
 
     # ── Mise en page ──────────────────────────
     fig.update_layout(
-        mapbox=dict(
+        map=dict(
             style="open-street-map",
             center={"lat": centre_lat, "lon": centre_lon},
             zoom=zoom,
@@ -1401,6 +1401,19 @@ RÈGLE IMPORTANTE SUR LES DATES :
 
     # ── Suggestions ───────────────────────────
     st.subheader("💡 Exemples de questions")
+    # Correspondance question → fichier audio
+    # Place tes fichiers MP3 dans le dossier audios/ à la racine du projet
+    AUDIOS = {
+        "Combien de chantiers Sévérisé fortifié ?":     "audios/audio_01_severise_fortifie.mp3",
+        "Quelle infrapôle a le plus de travaux ?":      "audios/audio_02_infrapole_plus_travaux.mp3",
+        "Combien de travaux de nuit ?":                 "audios/audio_03_travaux_de_nuit.mp3",
+        "Quel train est le plus impacté par les travaux ?": "audios/audio_04_train_impacte.mp3",
+        "Répartition des priorités ?":                  "audios/audio_05_repartition_priorites.mp3",
+        "Quel mois a eu le plus de travaux ?":          "audios/audio_06_mois_plus_travaux.mp3",
+        "Quelle est la ligne la plus impactée ?":       "audios/audio_07_ligne_plus_impactee.mp3",
+        "Différence entre Sévérisé et Sévérisé fortifié ?": "audios/audio_08_difference_severise.mp3",
+    }
+
     exemples = [
         "Combien de chantiers Sévérisé fortifié ?",
         "Quelle infrapôle a le plus de travaux ?",
@@ -1419,6 +1432,16 @@ RÈGLE IMPORTANTE SUR LES DATES :
                 st.session_state.messages_ia = st.session_state.get("messages_ia", [])
                 st.session_state.messages_ia.append({"role": "user", "content": ex})
                 st.session_state["question_en_attente"] = ex
+                # Déclencher l'audio correspondant
+                st.session_state["audio_en_attente"] = AUDIOS.get(ex)
+
+    # Lire l'audio si une question vient d'être cliquée
+    audio_path = st.session_state.pop("audio_en_attente", None)
+    if audio_path and os.path.exists(audio_path):
+        with open(audio_path, "rb") as f:
+            st.audio(f.read(), format="audio/mp3", autoplay=True)
+    elif audio_path:
+        st.caption("🔇 Audio non disponible pour cette question (fichier manquant)")
 
     st.divider()
 
