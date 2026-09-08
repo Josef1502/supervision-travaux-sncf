@@ -1532,7 +1532,7 @@ RÈGLE IMPORTANTE SUR LES DATES :
                     ] + st.session_state.messages_ia[-8:]
 
                     response = client.chat.completions.create(
-                        model="llama-3.1-8b-instant",
+                        model="openai/gpt-oss-20b",
                         messages=messages_groq,
                         max_tokens=600,
                         temperature=0.2,
